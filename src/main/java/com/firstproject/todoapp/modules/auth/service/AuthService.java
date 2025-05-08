@@ -1,12 +1,15 @@
 package com.firstproject.todoapp.modules.auth.service;
 
+import com.cloudinary.api.exceptions.BadRequest;
 import com.firstproject.todoapp.modules.auth.dto.*;
 import com.firstproject.todoapp.modules.users.entity.User;
 import com.firstproject.todoapp.modules.users.repository.UserRepository;
+import com.firstproject.todoapp.shared.exceptions.ConflictException;
 import com.firstproject.todoapp.shared.exceptions.EntityNotFoundException;
 import com.firstproject.todoapp.shared.exceptions.InvalidCredentialsException;
 import com.firstproject.todoapp.shared.exceptions.InvalidTokenException;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -18,9 +21,9 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
-    public String register(RegisterRequest request) {
+    public LoginResponseDTO register(RegisterRequest request) {
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-            return "User already exists";
+            throw new ConflictException("User already exists");
         }
 
         User user = User.builder()
@@ -33,7 +36,10 @@ public class AuthService {
 
 
         userRepository.save(user);
-        return "User created";
+
+        String accessToken = jwtService.generateToken(user.getUsername());
+        String refreshToken = jwtService.generateRefreshToken(user.getUsername());
+        return new LoginResponseDTO(accessToken, refreshToken);
     }
 
     public LoginResponseDTO login(LoginRequest request) {
@@ -54,7 +60,7 @@ public class AuthService {
         String refreshToken = request.getRefreshToken();
         String username = jwtService.extractUsername(refreshToken);
 
-
+        System.out.println("Refrescando token");
 
         if (!jwtService.isRefreshTokenValid(refreshToken, username)){
             throw new InvalidTokenException("Invalid Refresh Token");

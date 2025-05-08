@@ -1,6 +1,6 @@
 package com.firstproject.todoapp.shared.exceptions;
 
-import io.jsonwebtoken.JwtException;
+
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -96,6 +96,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(org.springframework.web.servlet.NoHandlerFoundException.class)
     public ResponseEntity<?> handleNotFoundException(org.springframework.web.servlet.NoHandlerFoundException ex) {
         return buildErrorResponse(HttpStatus.NOT_FOUND, "La ruta a la que intentas acceder no existe");
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<?> handleConflictException(ConflictException ex){
+        return buildErrorResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 
 }

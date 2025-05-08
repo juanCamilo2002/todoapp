@@ -28,8 +28,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/profile",
-                                "api/auth/change-password",
-                                "api/tasks/**",
+                                "/api/auth/change-password",
+                                "/api/tasks/**",
                                 "/api/users/**"
                         ).authenticated()
                         .anyRequest().permitAll()
